@@ -7,5 +7,5 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
     device_map="auto",
-    torch_dtype="float16"  # good for Apple MPS
+    dtype="float16"  # good for Apple MPS
 )
