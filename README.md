@@ -83,7 +83,7 @@ Here is a detailed overview of the project's file structure:
 ---
 
 ## 💾 Dataset
-The dataset, located at `data/dataset.jsonl`, is a JSON Lines file where each line represents a Q&A pair:
+The dataset, located at `data/qa_dataset.jsonl`, is a JSON Lines file where each line represents a Q&A pair:
 ```json
 {"question": "What is the primary purpose of the ...?", "answer": "The primary purpose is to enable ultra-low-latency, real-time fraud screening..."}
 ```
@@ -116,7 +116,17 @@ The fine-tuning process is handled by `scripts/fine_tune.py`. Here’s a summary
 -   **Qualitative**: The script also generates sample answers for questions from the test set to allow for a manual review of the model's performance.
 -   **Visualization**: The `scripts/plot_loss.py` script generates a plot of the training and validation loss curves, saved as `loss_curve.png`.
 
-![Loss Curve](loss_curve.png)
+### Version 1: Initial Training Run
+
+The first training run (v1) showed signs of overfitting, where the validation loss started to increase while the training loss continued to decrease.
+
+![Initial Loss Curve (v1)](loss_curve_v1.png)
+
+### Version 2: Improved Training Run
+
+After implementing a more robust training strategy (v2) with early stopping and better hyperparameters, the new loss curve shows a much healthier trend, with the validation loss closely tracking the training loss.
+
+![Improved Loss Curve (v2)](loss_curve.png)
 
 ---
 
@@ -172,6 +182,13 @@ This command generates the `loss_curve.png` image from the latest training logs,
 
 ```bash
 make plot
+```
+
+### 🧪 Manual Inference
+To test the model with a single, hardcoded prompt, you can use the `inference` command. This is useful for a quick qualitative check.
+
+```bash
+make inference
 ```
 
 ### 🧹 Cleaning Up

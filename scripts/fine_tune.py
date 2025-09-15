@@ -35,9 +35,9 @@ if tokenizer.pad_token is None:
 
 # LoRA config
 config = LoraConfig(
-    r=16,
+    r=32,
     lora_alpha=64,
-    target_modules=["q_proj", "v_proj", "k_proj", "out_proj", "fc_in", "fc_out"],
+    target_modules=["q_proj", "v_proj", "k_proj", "out_proj", "c_fc", "c_proj"],
     lora_dropout=0.05,
     bias="none",
     task_type="CAUSAL_LM"
@@ -69,14 +69,15 @@ eval_dataset = QnADataset(
 training_args = TrainingArguments(
     output_dir="./results",
     overwrite_output_dir=True,
-    num_train_epochs=15,
+    num_train_epochs=20,
     per_device_train_batch_size=4,
-    logging_steps=100,
-    save_steps=100,
+    gradient_accumulation_steps=2,
+    logging_steps=50,
+    save_steps=50,
     save_total_limit=2,
     eval_strategy="steps",
-    eval_steps=100,
-    load_best_model_at_end=True, # To prevent overfitting
+    eval_steps=50,
+    load_best_model_at_end=True,
     warmup_steps=100,
     lr_scheduler_type="cosine",
 )

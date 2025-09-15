@@ -24,6 +24,10 @@ plot:
 	@echo "--- Generating loss curve plot ---"
 	$(PYTHON) scripts/plot_loss.py
 
+inference:
+	@echo "--- Running a sample inference ---"
+	$(PYTHON) scripts/inference.py
+
 # --- Utility Targets ---
 
 clean:
@@ -34,4 +38,4 @@ clean:
 	rm -f data/train.jsonl data/validation.jsonl data/test.jsonl
 	@echo "✅ Cleanup complete."
 
-.PHONY: all prepare-dataset train evaluate plot clean
+.PHONY: all prepare-dataset train evaluate plot inference clean

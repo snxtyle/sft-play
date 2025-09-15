@@ -3,7 +3,7 @@ from sklearn.model_selection import train_test_split
 
 def prepare_dataset():
     # Load the original dataset
-    with open("data/extracted_qna.jsonl", "r") as f:
+    with open("data/qa_dataset.jsonl", "r") as f:
         data = [json.loads(line) for line in f]
 
     # Split data into training (80%), validation (10%), and test (10%)

@@ -6,6 +6,7 @@ import json
 import math
 import os
 from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
+from tqdm import tqdm
 
 class QnADataset(Dataset):
     def __init__(self, tokenizer, data, block_size):
@@ -69,11 +70,12 @@ eval_metrics = trainer.evaluate(eval_dataset=test_dataset)
 # --- Qualitative Examples & BLEU Score ---
 print("\n--- Generating examples and calculating BLEU scores ---")
 model.to("mps" if torch.backends.mps.is_available() else "cpu")
+tokenizer.pad_token = tokenizer.eos_token # Suppress the warning
 qualitative_results = []
 total_bleu_score = 0
 chencherry = SmoothingFunction()
 
-for i, item in enumerate(test_data):
+for item in tqdm(test_data, desc="Generating and Scoring"):
     prompt_text = f"Question: {item['question']}\nAnswer:"
     inputs = tokenizer(prompt_text, return_tensors="pt").to(model.device)
     
@@ -91,14 +93,6 @@ for i, item in enumerate(test_data):
         "actual_answer": item['answer'],
         "bleu_score": bleu_score
     })
-    
-    if i < 3: # Print first 3 examples
-        print(f"\n✅ Example {i+1}:")
-        print(f"Question: {item['question']}")
-        print(f"Generated Answer: {generated_text}")
-        print(f"➡️ Actual Answer: {item['answer']}")
-        print(f"BLEU Score: {bleu_score:.4f}")
-        print("-" * 30)
 
 # --- Final Report ---
 average_bleu = total_bleu_score / len(test_data)
