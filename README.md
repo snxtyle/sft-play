@@ -126,7 +126,7 @@ The first training run (v1) showed signs of overfitting, where the validation lo
 
 After implementing a more robust training strategy (v2) with early stopping and better hyperparameters, the new loss curve shows a much healthier trend, with the validation loss closely tracking the training loss.
 
-![Improved Loss Curve (v2)](loss_curve.png)
+![Improved Loss Curve (v2)](loss_curve_v2.png)
 
 ---
 
