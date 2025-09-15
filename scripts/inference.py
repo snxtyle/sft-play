@@ -19,7 +19,7 @@ model = PeftModel.from_pretrained(model, "./fine-tuned-gpt-neo")
 model = model.merge_and_unload()
 
 # Set up the prompt
-question = "What is the primary purpose of the DPIP Edge Service and how does it differ from the central DPIP service?"
+question = "What is the workflow of the ...?"
 prompt = f"Question: {question}\nAnswer:"
 
 # Tokenize the input

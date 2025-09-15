@@ -1,10 +1,8 @@
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, Trainer, TrainingArguments
+from transformers import AutoModelForCausalLM, AutoTokenizer, Trainer, TrainingArguments, EarlyStoppingCallback
 from peft import LoraConfig, get_peft_model
 from torch.utils.data import Dataset
 import json
-
-from sklearn.model_selection import train_test_split
 
 class QnADataset(Dataset):
     def __init__(self, tokenizer, data, block_size):
@@ -37,9 +35,9 @@ if tokenizer.pad_token is None:
 
 # LoRA config
 config = LoraConfig(
-    r=8,
-    lora_alpha=32,
-    target_modules=["q_proj", "v_proj"],
+    r=32,
+    lora_alpha=64,
+    target_modules=["q_proj", "v_proj", "k_proj", "out_proj", "c_fc", "c_proj"],
     lora_dropout=0.05,
     bias="none",
     task_type="CAUSAL_LM"
@@ -49,12 +47,12 @@ config = LoraConfig(
 model = get_peft_model(model, config)
 
 # Load data
-with open("data/extracted_qna.jsonl", "r") as f:
-    data = [json.loads(line) for line in f]
+def load_data(file_path):
+    with open(file_path, "r") as f:
+        return [json.loads(line) for line in f]
 
-# Split data into training (80%), validation (10%), and test (10%)
-train_data, temp_data = train_test_split(data, test_size=0.2, random_state=42)
-eval_data, test_data = train_test_split(temp_data, test_size=0.5, random_state=42)
+train_data = load_data("data/train.jsonl")
+eval_data = load_data("data/validation.jsonl")
 
 train_dataset = QnADataset(
     tokenizer=tokenizer,
@@ -68,23 +66,20 @@ eval_dataset = QnADataset(
     block_size=128
 )
 
-test_dataset = QnADataset(
-    tokenizer=tokenizer,
-    data=test_data,
-    block_size=128
-)
-
 training_args = TrainingArguments(
     output_dir="./results",
     overwrite_output_dir=True,
-    num_train_epochs=5,
+    num_train_epochs=20,
     per_device_train_batch_size=4,
-    logging_steps=100,
-    save_steps=100,
+    gradient_accumulation_steps=2,
+    logging_steps=50,
+    save_steps=50,
     save_total_limit=2,
     eval_strategy="steps",
-    eval_steps=100,
-    load_best_model_at_end=True, # To prevent overfitting
+    eval_steps=50,
+    load_best_model_at_end=True,
+    warmup_steps=100,
+    lr_scheduler_type="cosine",
 )
 
 trainer = Trainer(
@@ -92,6 +87,7 @@ trainer = Trainer(
     args=training_args,
     train_dataset=train_dataset,
     eval_dataset=eval_dataset,
+    callbacks=[EarlyStoppingCallback(early_stopping_patience=3)],
 )
 
 trainer.train()
